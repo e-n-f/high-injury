@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/opt/homebrew/bin/python3
 
 import json
 import math
@@ -38,38 +38,37 @@ for feature in features['features']:
 		total = 0
 
 		# walk forward until there is at least a quarter mile
-		for j in range(i + 1, len(geom)):
+		j = i + 1
+		while j < len(geom):
 			total = total + dist(geom[j - 1], geom[j])
 			if total >= 0.25:
 				break
+			j = j + 1
 
 		# continue walking forward while not at an intersection
 		while j < len(geom) and point_instances[str(geom[j])] == 1:
 			total = total + dist(geom[j - 1], geom[j])
 			j = j + 1
 
-		# skip streets that cannot be extended 0.25 miles from their origin
-		if (i == 0 or j == len(geom)) and total < 0.25:
-			break
-
-		obj = {
-			'type': 'Feature',
-			'properties': {
-				'name': feature['properties']['FULLNAME'],
-				'start': i,
-				'end': j,
-				'distance': total
-			},
-			'geometry': {
-				'type': 'LineString',
-				'coordinates': []
+		if total >= 0.25:
+			obj = {
+				'type': 'Feature',
+				'properties': {
+					'name': feature['properties']['FULLNAME'],
+					'start': i,
+					'end': j,
+					'distance': total
+				},
+				'geometry': {
+					'type': 'LineString',
+					'coordinates': []
+				}
 			}
-		}
 
-		for k in range(i, j):
-			obj['geometry']['coordinates'].append(geom[k])
+			for k in range(i, j):
+				obj['geometry']['coordinates'].append(geom[k])
 
-		print(json.dumps(obj))
+			print(json.dumps(obj))
 
 		# walk i forward to the next intersection too:
 		i = i + 1
